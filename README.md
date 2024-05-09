@@ -1,9 +1,9 @@
 # e-commerce demo #1
 
-# THIS IS AN ECOMMERCE PROJECT THAT WAS IMPLEMENTED USING :
+# THIS IS AN E-COMMERCE PROJECT IMPLEMENTED USING THE POWERS OF :
 
-    - Nextjs 14
-    - Typecript
+    - Next-js 14
+    - TypeScript
     - Tailwind css
     - shdadcn
     - prisma Database
