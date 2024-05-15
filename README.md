@@ -6,4 +6,5 @@
     - TypeScript
     - Tailwind css
     - shdadcn
-    - prisma Database
+    - prisma OMR/Database
+    - zod validation
