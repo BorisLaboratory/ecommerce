@@ -2,8 +2,8 @@
 
 import db from "@/db/db";
 import { z } from "zod";
-import fs from "fs/promises";
-import { redirect } from "next/navigation";
+import fs from "fs/promises"; // fs === file system
+import { notFound, redirect } from "next/navigation";
 // zod validation
 const fileSchema = z.instanceof(File, { message: "Required" });
 const imageSchema = fileSchema.refine(
@@ -47,9 +47,10 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   // create product
   await db.product.create({
     data: {
+      isAvalaibleForPurchase: false,
       name: data.name,
       description: data.description,
-      priceIncents: data.priceInCents,
+      priceInCents: data.priceInCents,
       filePath,
       imagePath,
     },
@@ -57,4 +58,16 @@ export async function addProduct(prevState: unknown, formData: FormData) {
 
   // after creating product, redirect to product page:
   redirect("/admin/products");
+}
+
+export async function toggleProductAvailability(
+  id: string,
+  isAvalaibleForPurchase: boolean
+) {
+  await db.product.update({ where: { id }, data: { isAvalaibleForPurchase } });
+}
+
+export async function deleteProduct(id: string) {
+  const product = await db.product.delete({ where: { id } }); // where productId =id, and returns the deleted product
+  if (product == null) return notFound();
 }
