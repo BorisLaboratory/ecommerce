@@ -1,10 +1,14 @@
-# e-commerce demo #1
+# e-commerce - fullstack implementation #1
 
-# THIS IS AN E-COMMERCE PROJECT IMPLEMENTED USING THE POWERS OF :
+# THIS E-COMMERCE PROJECT DEMONSTRATES THE POWERS OF :
 
     - Next-js 14
     - TypeScript
     - Tailwind css
     - shdadcn
-    - prisma OMR/Database
+    - prisma ORM/ SQLite Database
     - zod validation
+
+======================
+snippets
+-npx prisma migrate dev --name init
