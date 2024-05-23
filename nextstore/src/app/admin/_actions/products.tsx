@@ -17,6 +17,62 @@ const addSchema = z.object({
   file: fileSchema.refine((file) => file.size > 0, "Required"),
   image: fileSchema.refine((file) => file.size > 0, "Required"),
 });
+export async function updateProduct(
+  id: string,
+  prevState: unknown,
+  formData: FormData
+) {
+  const result = editSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  //  if validation fails, return the errors
+  if (result.success === false) {
+    return result.error.formErrors.fieldErrors;
+  }
+  // when success is true, we can use the data
+  const data = result.data;
+  const product = await db.product.findUnique({ where: { id } });
+
+  if (product == null) return notFound();
+
+  let filePath = product.filePath; // old file path
+  if (data.file != null && data.file.size > 0) {
+    // pass a file
+    await fs.unlink(product.filePath); // delete the old file
+    filePath = `products/${crypto.randomUUID()}-${data.file.name}`; // save the new file path
+    await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer())); // save the new file
+  }
+
+  let imagePath = product.imagePath; // default image path
+  if (data.image != null && data.image.size > 0) {
+    // pass a file
+    await fs.unlink(`public${product.imagePath}`); // delete the old inage
+    imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`; // save the new image path
+    await fs.writeFile(
+      `public${imagePath}`,
+      Buffer.from(await data.image.arrayBuffer())
+    ); // save the new file
+  }
+
+  // update product
+  await db.product.update({
+    where: { id },
+    data: {
+      name: data.name,
+      description: data.description,
+      priceInCents: data.priceInCents,
+      filePath,
+      imagePath,
+    },
+  });
+
+  // after updating product, redirect to product page:
+  redirect("/admin/products");
+}
+
+const editSchema = addSchema.extend({
+  file: fileSchema.optional(),
+  image: imageSchema.optional(),
+});
 // actions must be async
 export async function addProduct(prevState: unknown, formData: FormData) {
   const result = addSchema.safeParse(Object.fromEntries(formData.entries()));
@@ -47,7 +103,7 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   // create product
   await db.product.create({
     data: {
-      isAvalaibleForPurchase: false,
+      isAvailableForPurchase: false,
       name: data.name,
       description: data.description,
       priceInCents: data.priceInCents,
@@ -62,12 +118,15 @@ export async function addProduct(prevState: unknown, formData: FormData) {
 
 export async function toggleProductAvailability(
   id: string,
-  isAvalaibleForPurchase: boolean
+  isAvailableForPurchase: boolean
 ) {
-  await db.product.update({ where: { id }, data: { isAvalaibleForPurchase } });
+  await db.product.update({ where: { id }, data: { isAvailableForPurchase } });
 }
 
 export async function deleteProduct(id: string) {
   const product = await db.product.delete({ where: { id } }); // where productId =id, and returns the deleted product
   if (product == null) return notFound();
+  // delete files of the product too:
+  await fs.unlink(product.filePath);
+  await fs.unlink(`public${product.imagePath}`);
 }
