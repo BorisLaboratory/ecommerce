@@ -1,4 +1,8 @@
-# e-commerce - fullstack implementation #1
+# e-commerce - fullstack implementation #1 :
+
+https://BorisLaboratory.github.io/ecommerce
+
+#
 
 # THIS E-COMMERCE PROJECT DEMONSTRATES THE POWERS OF :
 
