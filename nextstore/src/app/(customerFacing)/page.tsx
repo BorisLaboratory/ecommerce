@@ -1,26 +1,48 @@
 import { ProductCard, ProductCardSkeleton } from "@/components/ui/ProductCard";
 import { Button } from "@/components/ui/button";
 import db from "@/db/db";
+import { cache } from "@/lib/cache";
 import { Product } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-function getMostPopularProducts() {
-  return db.product.findMany({
-    where: { isAvailableForPurchase: true },
-    orderBy: { orders: { _count: "desc" } },
-    take: 6,
-  });
-}
+const getMostPopularProducts = cache(
+  // caching helps page to load faster
+  () => {
+    return db.product.findMany({
+      where: { isAvailableForPurchase: true },
+      orderBy: { orders: { _count: "desc" } },
+      take: 6,
+    });
+  },
+  ["/", "getMostPopularProducts"], // keyParts
+  { revalidate: 60 * 60 * 24 }
+); //check new data every 24hrs calculated in seconds
 
-function getNewestProducts() {
+const getNewestProducts = cache(() => {
   return db.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
-}
+}, ["/", "getNewestProducts"]);
+
+// function getMostPopularProducts() {
+//   return db.product.findMany({
+//     where: { isAvailableForPurchase: true },
+//     orderBy: { orders: { _count: "desc" } },
+//     take: 6,
+//   });
+// }
+
+// function getNewestProducts() {
+//   return db.product.findMany({
+//     where: { isAvailableForPurchase: true },
+//     orderBy: { createdAt: "desc" },
+//     take: 6,
+//   });
+// }
 
 function wait(duration: number) {
   return new Promise((resolve) => setTimeout(resolve, duration));
