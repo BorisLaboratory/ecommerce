@@ -4,6 +4,7 @@ import db from "@/db/db";
 import { z } from "zod";
 import fs from "fs/promises"; // fs === file system
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 // zod validation
 const fileSchema = z.instanceof(File, { message: "Required" });
 const imageSchema = fileSchema.refine(
@@ -65,6 +66,8 @@ export async function updateProduct(
     },
   });
 
+  revalidatePath("/"); //Homepage. replace cache with new data
+  revalidatePath("/products"); //Product page. replace cache with new data
   // after updating product, redirect to product page:
   redirect("/admin/products");
 }
@@ -112,6 +115,8 @@ export async function addProduct(prevState: unknown, formData: FormData) {
     },
   });
 
+  revalidatePath("/"); //Homepage. replace cache with new data
+  revalidatePath("/products"); //Product page. replace cache with new data
   // after creating product, redirect to product page:
   redirect("/admin/products");
 }
@@ -121,6 +126,9 @@ export async function toggleProductAvailability(
   isAvailableForPurchase: boolean
 ) {
   await db.product.update({ where: { id }, data: { isAvailableForPurchase } });
+
+  revalidatePath("/"); //Homepage. replace cache with new data
+  revalidatePath("/products"); //Product page. replace cache with new data
 }
 
 export async function deleteProduct(id: string) {
@@ -129,4 +137,7 @@ export async function deleteProduct(id: string) {
   // delete files of the product too:
   await fs.unlink(product.filePath);
   await fs.unlink(`public${product.imagePath}`);
+
+  revalidatePath("/"); //Homepage. replace cache with new data
+  revalidatePath("/products"); //Product page. replace cache with new data
 }

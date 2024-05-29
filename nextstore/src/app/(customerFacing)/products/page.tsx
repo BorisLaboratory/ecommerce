@@ -2,13 +2,14 @@ import { ProductCard, ProductCardSkeleton } from "@/components/ui/ProductCard";
 import db from "@/db/db";
 import { Suspense } from "react";
 import { Product } from "@prisma/client";
+import { cache } from "@/lib/cache";
 
-function getProducts() {
+const getProducts = cache(() => {
   return db.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { name: "asc" },
   });
-}
+}, ["/products", "getProducts"]); //keyparts
 //
 export default function ProductPage() {
   return (
