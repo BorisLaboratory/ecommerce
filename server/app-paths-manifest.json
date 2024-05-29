@@ -2,8 +2,8 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/(customerFacing)/page": "app/(customerFacing)/page.js",
   "/(customerFacing)/products/page": "app/(customerFacing)/products/page.js",
-  "/admin/products/[id]/download/route": "app/admin/products/[id]/download/route.js",
   "/admin/page": "app/admin/page.js",
+  "/admin/products/[id]/download/route": "app/admin/products/[id]/download/route.js",
   "/admin/products/[id]/edit/page": "app/admin/products/[id]/edit/page.js",
   "/admin/products/new/page": "app/admin/products/new/page.js",
   "/admin/products/page": "app/admin/products/page.js"
