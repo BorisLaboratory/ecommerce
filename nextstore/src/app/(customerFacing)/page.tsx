@@ -76,11 +76,6 @@ function ProductGridSection({
         >
           <ProductSuspense productFetcher={productFetcher} />
         </Suspense>
-
-        {/* {(await productFetcher()).map((product) => (
-          // <ProductCard key={product.id} {...product} />
-          <ProductCardSkeleton key={product.id} {...product} />
-        ))} */}
       </div>
     </div>
   );
