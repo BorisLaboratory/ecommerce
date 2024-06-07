@@ -2,6 +2,7 @@
 import Image from "next/image";
 import {
   Elements,
+  LinkAuthenticationElement,
   PaymentElement,
   useElements,
   useStripe,
@@ -20,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FormEvent, useState } from "react";
 //
 type CheckoutFormProps = {
   product: {
@@ -73,24 +75,63 @@ export default function CheckoutForm({
 function Form({ priceInCents }: { priceInCents: number }) {
   const stripe = useStripe(); // stripe instance to use
   const elements = useElements(); // contains details of payment and email
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  //
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (stripe == null || elements == null) return;
+    //
+    setIsLoading(true);
+    // Customer can only buy this product once
+    // check if order already exist:
+
+    stripe
+      .confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
+        },
+      })
+      .then(({ error }) => {
+        if (error.type === "card_error" || error.type === "validation_error") {
+          setErrorMessage(error.message);
+        } else {
+          setErrorMessage("unknown error has occurred");
+        }
+      })
+      .finally(() => setIsLoading(false));
+  }
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
           <CardTitle> Checkout</CardTitle>
-          <CardDescription className="text-destructive">Error</CardDescription>
+          {errorMessage && (
+            <CardDescription className="text-destructive">
+              {errorMessage}
+            </CardDescription>
+          )}
         </CardHeader>
       </Card>
       <CardContent>
         <PaymentElement />
+        {/* add email field : */}
+        <div className="mt-4">
+          <LinkAuthenticationElement />
+        </div>
       </CardContent>
       <CardFooter>
         <Button
+          type="submit"
           className="w-full"
           size="lg"
-          disabled={stripe == null || elements == null}
+          disabled={stripe == null || elements == null || isLoading}
         >
-          Buy - {formatCurrency(priceInCents / 100)}
+          {isLoading
+            ? "Purchasing..."
+            : `Buy-${formatCurrency(priceInCents / 100)}`}
         </Button>
       </CardFooter>
     </form>
